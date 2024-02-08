@@ -10,5 +10,9 @@ Recommend to build the liboqs library by the following command:
 6. ``make all``
 7. ``sudo make install``
 
+### List of Pre-installed libraries
+1. Vacuum filter (https://github.com/wuwuz/Vacuum-Filter)
+2. libsodium library (https://libsodium.gitbook.io/doc/)
+
 ### How to compile 
 ``gcc example_sig.c -loqs -lpthread -lm``
