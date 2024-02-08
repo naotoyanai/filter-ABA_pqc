@@ -14,11 +14,11 @@ Recommend to build the liboqs library by the following command:
 1. Vacuum filter (https://github.com/wuwuz/Vacuum-Filter)
 2. libsodium library (https://libsodium.gitbook.io/doc/)
 
-### How to compile 
+### How to compile and execute
 1. type ``git clone https://github.com/wuwuz/Vacuum-Filter``.
 2. Relace ``test.cpp`` and ``makefile" in `Vacuumfilter` with the file in this repository. 
 3. Put ``trivial.cpp`` in the same repository. 
-4. ``make test``
+4. ``make test`` for the generic construction or ``make trivial`` for the trivial construction
 
 ### Direct complile option from the liboqs library
 ``gcc example_sig.c -loqs -lpthread -lm``
