@@ -110,6 +110,184 @@ static OQS_STATUS example_stack(void) {
 }
 
 
+void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
+
+    /*
+        We implemented VF_no_padding from scratch.
+        It supports fingerprint length from 4 to 16 bits, but we recommend to use fingerprint longer than 8 bits.
+        This version aims at flexibility, so it is slower than VF_with_padding.
+    */
+    struct rusage setup_start, setup_end, keygen_start, keygen_end, 
+        sign_start, sign_end, vrfy_start, vrfy_end;
+
+    cout << "Testing vacuum filter(no padding)..." << endl;
+
+
+    cout << "Keys number = " << n << endl;
+    cout << "Queries number = " << q << endl;
+
+    mt19937 rd(12821);
+    vector<uint64_t> insKey;
+    vector<uint64_t> alienKey;
+    /*
+    random_gen(n, insKey, rd);
+    random_gen(q, alienKey, rd);
+    */
+
+    #ifdef OQS_ENABLE_SIG_dilithium_2
+
+	OQS_STATUS rc;
+    /* Definition of structures for Dilithium*/
+	uint8_t public_key[OQS_SIG_dilithium_2_length_public_key];
+	uint8_t secret_key[OQS_SIG_dilithium_2_length_secret_key];
+	uint8_t message[MESSAGE_LEN];
+	uint8_t signature[OQS_SIG_dilithium_2_length_signature];
+	size_t message_len = MESSAGE_LEN;
+	size_t signature_len;
+
+    VacuumFilter<uint16_t, 16> vf;
+
+    /* Cleaning up memory etc */
+    void cleanup_stack(uint8_t *secret_key, size_t secret_key_len);
+
+    void cleanup_heap(uint8_t *public_key, uint8_t *secret_key,
+                  uint8_t *message, uint8_t *signature,
+                  OQS_SIG *sig);
+
+    #endif
+
+    /* Setup: Generation of Crypto keys */
+    getrusage(RUSAGE_SELF, &setup_start);
+
+    unsigned char pk[crypto_sign_PUBLICKEYBYTES];
+    unsigned char sk[crypto_sign_SECRETKEYBYTES];
+    crypto_sign_keypair(pk, sk);
+
+    unsigned char signed_message[crypto_sign_BYTES + MESSAGE_LEN];
+    unsigned long long signed_message_len;
+
+    getrusage(RUSAGE_SELF, &setup_end);
+
+    printf("%s\n", MESSAGE);
+
+
+    /* KeyGen */
+
+    getrusage(RUSAGE_SELF, &keygen_start);
+
+    random_gen(n, insKey, rd); /* unique value for uint64_t as vk_id */
+    random_gen(q, alienKey, rd);
+
+    getrusage(RUSAGE_SELF, &keygen_end);
+
+    /* Sign */ 
+
+    getrusage(RUSAGE_SELF, &sign_start);    
+
+    crypto_sign(signed_message, &signed_message_len, MESSAGE, MESSAGE_LEN, sk);
+    printf("%s\n", signed_message);
+
+    
+    vf.init(n, slots, max_kick); /* vf.init(max_item_numbers, slots per bucket, max_kick_steps) 
+        --> Gen of Vacuum */
+
+    for (int i = 0; i < n; i++)
+        if (vf.insert(insKey[i]) == false)
+            cout << "Insertion fails when inserting " << i << "th key: " << insKey[i] << endl;
+
+    int T = static_cast<int>(vf.get_load_factor()) * 100;
+    printf("T: %d\n", T); /* for debug */
+
+    /* cast from AMQ to message as m||T 
+    MESSAGE << T;
+    */
+    getrusage(RUSAGE_SELF, &sign_end);
+    cout << "Load factor = " << vf.get_load_factor() << endl;
+
+
+    /* Verify */
+
+    getrusage(RUSAGE_SELF, &vrfy_start);
+    unsigned char unsigned_message[MESSAGE_LEN];
+    unsigned long long unsigned_message_len;
+
+    if (crypto_sign_open(unsigned_message, &unsigned_message_len, signed_message, 
+        signed_message_len, pk) != 0) { /* checking signature verification */
+        printf("incorrect signature!\n");
+        /* incorrect signature! */
+    }
+
+    for (int i = 0; i < n; i++) 
+        if (vf.lookup(insKey[i]) == false) { /* checking insKey[i] by Lookup */
+        /*
+            cout << "False negative happens at " << i << "th key: " << insKey[i] << endl;
+            printf("incrrect AMQ!\n");
+            break;
+        */
+        }
+
+    getrusage(RUSAGE_SELF, &vrfy_end);
+
+
+    printf("Setup (user-time) \n");
+    printf("Setup (sys-time) \n");
+
+    printf("KeyGen (user-time) \n");
+    printf("KeyGen (sys-time) \n");
+
+    printf("Sign (user-time) \n");
+    printf("Sign (sys-time) \n");
+
+    printf("Verify (user-time) \n");
+    printf("Verify (sys-time) \n");
+
+
+    printf("%lf\n",
+        (setup_end.ru_utime.tv_sec  - setup_start.ru_utime.tv_sec) +
+        (setup_end.ru_utime.tv_usec - setup_start.ru_utime.tv_usec)*1.0E-6
+        );
+    printf("%lf\n",
+        (setup_end.ru_stime.tv_sec  - setup_start.ru_stime.tv_sec) +
+        (setup_end.ru_stime.tv_usec - setup_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("%lf\n",
+        (keygen_end.ru_utime.tv_sec  - keygen_start.ru_utime.tv_sec) +
+        (keygen_end.ru_utime.tv_usec - keygen_start.ru_utime.tv_usec)*1.0E-6);
+    printf("%lf\n",
+        (keygen_end.ru_stime.tv_sec  - keygen_start.ru_stime.tv_sec) +
+        (keygen_end.ru_stime.tv_usec - keygen_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("%lf\n",
+        (sign_end.ru_utime.tv_sec  - sign_start.ru_utime.tv_sec) +
+        (sign_end.ru_utime.tv_usec - sign_start.ru_utime.tv_usec)*1.0E-6);
+    printf("%lf\n",
+        (sign_end.ru_stime.tv_sec  - sign_start.ru_stime.tv_sec) +
+        (sign_end.ru_stime.tv_usec - sign_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("%lf\n",
+        (vrfy_end.ru_utime.tv_sec  - vrfy_start.ru_utime.tv_sec) +
+        (vrfy_end.ru_utime.tv_usec - vrfy_start.ru_utime.tv_usec)*1.0E-6);
+    printf("%lf\n",
+        (vrfy_end.ru_stime.tv_sec  - vrfy_start.ru_stime.tv_sec) +
+        (vrfy_end.ru_stime.tv_usec - vrfy_start.ru_stime.tv_usec)*1.0E-6);
+
+
+
+    int false_positive_cnt = 0;
+
+    for (int i = 0; i < q; i++)
+        if (vf.lookup(alienKey[i]) == true)
+            false_positive_cnt++;
+
+    cout << "False positive rate = " << double(false_positive_cnt) / q << endl;
+    cout << "Bits per key = " << vf.get_bits_per_item() << endl;
+/*
+    for (int i = 0; i < n; i++)
+        if (vf.del(insKey[i]) == false)
+            cout << "Deletion fails when inserting " << i << "th key: " << insKey[i] << endl;
+*/
+    cout << endl;
+}
 
 
 void test_vf_no_padding() { /* Vacuum from scratch */
@@ -422,7 +600,7 @@ int main() {
     */
 
 
-/*
+
     unsigned char pk[crypto_sign_PUBLICKEYBYTES];
     unsigned char sk[crypto_sign_SECRETKEYBYTES];
     crypto_sign_keypair(pk, sk);
@@ -435,7 +613,6 @@ int main() {
 
     printf("%s\n", signed_message);
     printf("%s\n", MESSAGE);
-*/
 
     return 0;
 }
