@@ -163,7 +163,7 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
     if (rc != OQS_SUCCESS) {
 		fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_keypair failed!\n");
 		cleanup_stack(secret_key, OQS_SIG_dilithium_2_length_secret_key);
-        printf("break due to error\n"); 
+        printf("break due to error in Setup\n"); 
 	}
 
     /* KeyGen */
@@ -175,9 +175,44 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
 
     getrusage(RUSAGE_SELF, &keygen_end);
 
-    
+    /* Sign */
+    rc = OQS_SIG_dilithium_2_sign(signature, &signature_len, message, message_len, secret_key);
+	if (rc != OQS_SUCCESS) {
+		fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_sign failed!\n");
+		cleanup_stack(secret_key, OQS_SIG_dilithium_2_length_secret_key);
+		printf("break due to error in Sign\n");
+	}
+
+    vf.init(n, slots, max_kick); /* vf.init(max_item_numbers, slots per bucket, max_kick_steps) 
+        --> Gen of Vacuum */
+
+    for (int i = 0; i < n; i++)
+        if (vf.insert(insKey[i]) == false)
+            cout << "Insertion fails when inserting " << i << "th key: " << insKey[i] << endl;
+
+    int T = static_cast<int>(vf.get_load_factor()) * 100;
+    printf("T: %d\n", T); /* for debug */
+
+    /* Verify */
+	rc = OQS_SIG_dilithium_2_verify(message, message_len, signature, signature_len, public_key);
+	if (rc != OQS_SUCCESS) {
+		fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_verify failed!\n");
+		cleanup_stack(secret_key, OQS_SIG_dilithium_2_length_secret_key);
+		printf("break due to error in Verify\n");
+	}
+
+
+    for (int i = 0; i < n; i++) 
+        if (vf.lookup(insKey[i]) == false) { /* checking insKey[i] by Lookup */
+        /*
+            cout << "False negative happens at " << i << "th key: " << insKey[i] << endl;
+            printf("incrrect AMQ!\n");
+            break;
+        */
+        }
+
     /* The following codes are for libsodium */
-    /* Setup: Generation of Crypto keys 
+    /* Setup: Generation of Crypto keys  */
     getrusage(RUSAGE_SELF, &setup_start);
 
     unsigned char pk[crypto_sign_PUBLICKEYBYTES];
@@ -190,17 +225,16 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
     getrusage(RUSAGE_SELF, &setup_end);
 
     printf("%s\n", MESSAGE);
-    */
+   
 
     /* KeyGen */
-    /*
     getrusage(RUSAGE_SELF, &keygen_start);
 
     random_gen(n, insKey, rd); 
     random_gen(q, alienKey, rd);
 
     getrusage(RUSAGE_SELF, &keygen_end);
-    */
+  
 
     /* Sign */ 
 
