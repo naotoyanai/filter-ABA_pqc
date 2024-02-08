@@ -144,6 +144,7 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
 
     /* Definition of structures for Dilithium*/
  
+    getrusage(RUSAGE_SELF, &setup_start);
 	OQS_STATUS rc;
 
     uint8_t public_key[OQS_SIG_dilithium_2_length_public_key];
@@ -165,6 +166,7 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
 		cleanup_stack(secret_key, OQS_SIG_dilithium_2_length_secret_key);
         printf("break due to error in Setup\n"); 
 	}
+    getrusage(RUSAGE_SELF, &setup_end);
 
     /* KeyGen */
 
