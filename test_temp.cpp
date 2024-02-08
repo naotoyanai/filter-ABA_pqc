@@ -439,19 +439,3 @@ int main() {
 
     return 0;
 }
-
-void cleanup_stack(uint8_t *secret_key, size_t secret_key_len) {
-	OQS_MEM_cleanse(secret_key, secret_key_len);
-}
-
-void cleanup_heap(uint8_t *public_key, uint8_t *secret_key,
-                  uint8_t *message, uint8_t *signature,
-                  OQS_SIG *sig) {
-	if (sig != NULL) {
-		OQS_MEM_secure_free(secret_key, sig->length_secret_key);
-	}
-	OQS_MEM_insecure_free(public_key);
-	OQS_MEM_insecure_free(message);
-	OQS_MEM_insecure_free(signature);
-	OQS_SIG_free(sig);
-}
