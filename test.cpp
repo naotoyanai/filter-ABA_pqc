@@ -211,78 +211,8 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
         */
         }
 
-    /* The following codes are for libsodium */
-    /* Setup: Generation of Crypto keys  */
-    getrusage(RUSAGE_SELF, &setup_start);
-
-    unsigned char pk[crypto_sign_PUBLICKEYBYTES];
-    unsigned char sk[crypto_sign_SECRETKEYBYTES];
-    crypto_sign_keypair(pk, sk);
-
-    unsigned char signed_message[crypto_sign_BYTES + MESSAGE_LEN];
-    unsigned long long signed_message_len;
-
-    getrusage(RUSAGE_SELF, &setup_end);
-
-    printf("%s\n", MESSAGE);
-   
-
-    /* KeyGen */
-    getrusage(RUSAGE_SELF, &keygen_start);
-
-    random_gen(n, insKey, rd); 
-    random_gen(q, alienKey, rd);
-
-    getrusage(RUSAGE_SELF, &keygen_end);
-  
-
-    /* Sign */ 
-
-    getrusage(RUSAGE_SELF, &sign_start);    
-
-    crypto_sign(signed_message, &signed_message_len, MESSAGE, MESSAGE_LEN, sk);
-    printf("%s\n", signed_message);
-
-    
-    vf.init(n, slots, max_kick); /* vf.init(max_item_numbers, slots per bucket, max_kick_steps) 
-        --> Gen of Vacuum */
-
-    for (int i = 0; i < n; i++)
-        if (vf.insert(insKey[i]) == false)
-            cout << "Insertion fails when inserting " << i << "th key: " << insKey[i] << endl;
-
-    int T = static_cast<int>(vf.get_load_factor()) * 100;
-    printf("T: %d\n", T); /* for debug */
-
-    /* cast from AMQ to message as m||T 
-    MESSAGE << T;
-    */
-    getrusage(RUSAGE_SELF, &sign_end);
-    cout << "Load factor = " << vf.get_load_factor() << endl;
-
-
-    /* Verify */
-
-    getrusage(RUSAGE_SELF, &vrfy_start);
-    unsigned char unsigned_message[MESSAGE_LEN];
-    unsigned long long unsigned_message_len;
-
-    if (crypto_sign_open(unsigned_message, &unsigned_message_len, signed_message, 
-        signed_message_len, pk) != 0) { /* checking signature verification */
-        printf("incorrect signature!\n");
-        /* incorrect signature! */
-    }
-
-    for (int i = 0; i < n; i++) 
-        if (vf.lookup(insKey[i]) == false) { /* checking insKey[i] by Lookup */
-        /*
-            cout << "False negative happens at " << i << "th key: " << insKey[i] << endl;
-            printf("incrrect AMQ!\n");
-            break;
-        */
-        }
-
     getrusage(RUSAGE_SELF, &vrfy_end);
+
 
 
     printf("Setup (user-time) \n");
