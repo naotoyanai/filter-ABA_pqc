@@ -178,6 +178,9 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
     getrusage(RUSAGE_SELF, &keygen_end);
 
     /* Sign */
+    getrusage(RUSAGE_SELF, &sign_start);
+
+
     rc = OQS_SIG_dilithium_2_sign(signature, &signature_len, message, message_len, secret_key);
 	if (rc != OQS_SUCCESS) {
 		fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_sign failed!\n");
@@ -193,9 +196,12 @@ void test_vf_no_padding_dilithium() { /* Vacuum with Dilithium */
             cout << "Insertion fails when inserting " << i << "th key: " << insKey[i] << endl;
 
     int T = static_cast<int>(vf.get_load_factor()) * 100;
+    getrusage(RUSAGE_SELF, &sign_end);
     printf("T: %d\n", T); /* for debug */
 
     /* Verify */
+
+    getrusage(RUSAGE_SELF, &vrfy_start);
 	rc = OQS_SIG_dilithium_2_verify(message, message_len, signature, signature_len, public_key);
 	if (rc != OQS_SUCCESS) {
 		fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_verify failed!\n");
