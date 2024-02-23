@@ -12,7 +12,7 @@ Recommend to build the liboqs library by the following command:
 
 ### List of Pre-installed libraries
 1. Vacuum filter (https://github.com/wuwuz/Vacuum-Filter)
-2. libsodium library (https://libsodium.gitbook.io/doc/)
+2. liboqs library (https://github.com/open-quantum-safe/liboqs)
 
 ### How to compile and execute
 1. type ``git clone https://github.com/wuwuz/Vacuum-Filter``.
