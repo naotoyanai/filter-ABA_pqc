@@ -1,4 +1,4 @@
-CFLAGS = -pg -g -Wall -std=c++14 -mpopcnt -march=native
+CFLAGS = -pg -g -Wall -std=c++14 -march=native
 
 all: test trivial test_rasp trivial_rasp
 
@@ -17,5 +17,3 @@ trivial_rasp: trivial_rasp.cpp vacuum.h hashutil.h
 
 clean:
         rm -f test trivial
-
-~                                                                        ~                  
