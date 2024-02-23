@@ -8,7 +8,7 @@
 #include "vacuum.h"
 #include "hashutil.h"
 
-#include <sodium.h> /* g++ opition: -lsodium */
+/* #include <sodium.h> /* g++ opition: -lsodium */ 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
