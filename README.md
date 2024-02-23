@@ -3,6 +3,7 @@
 ### List of Pre-installed libraries
 1. Vacuum filter (https://github.com/wuwuz/Vacuum-Filter)
 2. liboqs library (https://github.com/open-quantum-safe/liboqs)
+3. libsodium library (https://libsodium.gitbook.io/doc/)
 
 #### Install `liboqs` library
 Recommend to build the liboqs library by the following command: 
