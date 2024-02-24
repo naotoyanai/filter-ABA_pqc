@@ -727,10 +727,12 @@ int main(int argc, char *argv[])
 
 
     /* Measurement Output */
+    /*
     printf("Command for Auth: %s\n", command);
     printf("Num. of devices: %d\n", N);
     printf("Num. of devices in List: %d\n", User);
     printf("Num. of devices not in List: %d\n", N-User);
+    */
 
     /* 
     printf("Setup (user-time) \t%lfs\n",
