@@ -1,6 +1,6 @@
 CFLAGS  = -pg -g -Wall -std=c++14 -march=native
 
-all: test trivial test_rasp trivial_rasp
+all: test trivial falcon test_rasp trivial_rasp
 
 test: test.cpp vacuum.h hashutil.h
 	g++ $(CFLAGS) -Ofast -o test test.cpp -lsodium -loqs -lpthread -lm -lssl -lcrypto
