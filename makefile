@@ -9,7 +9,7 @@ test_rasp: test_rasp.cpp vacuum.h hashutil.h
 	g++ $(CFLAGS) -Ofast -o test_rasp test_rasp.cpp -lsodium -loqs -lpthread -lm -lssl -lcrypto
 
 falcon: test_falcon512.cpp vacuum.h hashutil.h
-	g++ $(CFLAGS) -Ofast -o falcon512 test.cpp -lsodium -loqs -lpthread -lm -lssl -lcrypto
+	g++ $(CFLAGS) -Ofast -o falcon512 test_falcon512.cpp -lsodium -loqs -lpthread -lm -lssl -lcrypto
 
 trivial: trivial.cpp vacuum.h hashutil.h
 	g++ $(CFLAGS) -Ofast -o trivial trivial.cpp -lsodium -loqs -lpthread -lm -lssl -lcrypto
